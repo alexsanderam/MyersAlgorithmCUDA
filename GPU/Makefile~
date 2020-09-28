@@ -1,0 +1,34 @@
+EXEFILE   = myers
+GPUCC     = /usr/local/cuda/bin/nvcc
+CPUCC     =  gcc
+NVCCFLAGS = -arch=compute_20 -code=sm_20,sm_30,sm_35 -m64 -O3
+CPPFLAGS  = -m64 -O3
+DEFS      = 
+
+INCLUDES  = -I.                           \
+            -I/usr/local/cuda/include   
+
+LIBDIR   =  -L/usr/lib64                          \
+            -L/usr/local/cuda/lib64               
+
+LIBS     =  -lm -lcuda -lcudart
+
+
+LINK     =  $(LIBDIR) $(LIBS)
+
+C_COMPILE = $(CPUCC) $(DEFS) $(INCLUDES) $(CPPFLAGS) 
+G_COMPILE = $(GPUCC) $(DEFS) $(INCLUDES) $(NVCCFLAGS)
+
+all: main clean
+
+main:  in kernel
+	$(C_COMPILE) in.o myers_texture.o $(LINK) -o $(EXEFILE)
+
+kernel:
+	$(G_COMPILE) -c myers_texture.cu
+
+in:
+	$(C_COMPILE) -c in.c
+
+clean:
+	rm *.o; #rm $(EXEFILE)
